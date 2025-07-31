@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location-Based Weather App</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the Inter font and general body styling */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem; /* Add some padding for mobile */
+            box-sizing: border-box;
+        }
+        /* Ensure the main container is centered and responsive */
+        .weather-container {
+            max-width: 500px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Softer shadow */
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #3b82f6; /* Blue spinner */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .error-message {
+            color: #ef4444; /* Red error message */
+            font-weight: 500;
+        }
+        .weather-icon {
+            font-size: 4rem; /* Larger icon */
+            margin-bottom: 0.5rem;
+        }
+        .temperature {
+            font-size: 3.5rem; /* Larger temperature */
+            font-weight: 700;
+            color: #1f2937; /* Darker text for temperature */
+        }
+        .description {
+            font-size: 1.5rem;
+            color: #4b5563; /* Slightly lighter text for description */
+            text-transform: capitalize; /* Capitalize first letter */
+        }
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Responsive grid */
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .detail-item {
+            background-color: #f9fafb; /* Lighter background for detail items */
+            padding: 1rem;
+            border-radius: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+        }
+        .detail-item span:first-child {
+            font-size: 0.9rem;
+            color: #6b7280; /* Gray text for labels */
+        }
+        .detail-item span:last-child {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #374151; /* Darker text for values */
+        }
+    </style>
+</head>
+<body>
+    <div id="weather-app" class="weather-container">
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">Weather Forecast</h1>
+
+        <div id="loading" class="loading-spinner"></div>
+        <div id="error-message" class="error-message hidden"></div>
+
+        <div id="weather-display" class="hidden">
+            <p id="city-name" class="text-xl font-semibold text-gray-700 mb-2"></p>
+            <div class="flex flex-col items-center">
+                <div id="weather-icon" class="weather-icon"></div>
+                <p id="temperature" class="temperature"></p>
+                <p id="description" class="description"></p>
+            </div>
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span>Humidity</span>
+                    <span id="humidity"></span>
+                </div>
+                <div class="detail-item">
+                    <span>Wind Speed</span>
+                    <span id="wind-speed"></span>
+                </div>
+                <div class="detail-item">
+                    <span>Pressure</span>
+                    <span id="pressure"></span>
+                </div>
+                <div class="detail-item">
+                    <span>Visibility</span>
+                    <span id="visibility"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get references to DOM elements
+        const loadingElement = document.getElementById('loading');
+        const errorMessageElement = document.getElementById('error-message');
+        const weatherDisplayElement = document.getElementById('weather-display');
+        const cityNameElement = document.getElementById('city-name');
+        const weatherIconElement = document.getElementById('weather-icon');
+        const temperatureElement = document.getElementById('temperature');
+        const descriptionElement = document.getElementById('description');
+        const humidityElement = document.getElementById('humidity');
+        const windSpeedElement = document.getElementById('wind-speed');
+        const pressureElement = document.getElementById('pressure');
+        const visibilityElement = document.getElementById('visibility');
+
+        /**
+         * Fetches weather data based on latitude and longitude.
+         * In a real application, you would replace this with an actual API call
+         * to a weather service (e.g., OpenWeatherMap, AccuWeather).
+         * For demonstration purposes, this function returns mock data.
+         *
+         * @param {number} lat - Latitude.
+         * @param {number} lon - Longitude.
+         * @returns {Promise<Object>} A promise that resolves with weather data.
+         */
+        async function fetchWeatherData(lat, lon) {
+            // --- IMPORTANT: In a real app, you would use a weather API here ---
+            // Example using OpenWeatherMap (you'd need an API key):
+            // const API_KEY = 'YOUR_OPENWEATHERMAP_API_KEY';
+            // const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
+            // const response = await fetch(url);
+            // if (!response.ok) {
+            //     throw new Error(`HTTP error! status: ${response.status}`);
+            // }
+            // const data = await response.json();
+            // return data;
+            // ------------------------------------------------------------------
+
+            // Simulate network delay and return mock data
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    const mockData = {
+                        name: "Dhaka", // Placeholder city, would be resolved by actual API
+                        main: {
+                            temp: 28 + (Math.random() * 5 - 2.5), // Simulate slight temp variation
+                            humidity: 75 + (Math.random() * 10 - 5),
+                            pressure: 1012 + (Math.random() * 5 - 2.5)
+                        },
+                        weather: [{
+                            description: "partly cloudy",
+                            icon: "04d" // Example icon code
+                        }],
+                        wind: {
+                            speed: 5.2 + (Math.random() * 2 - 1)
+                        },
+                        visibility: 10000 // meters
+                    };
+                    resolve(mockData);
+                }, 1500); // Simulate 1.5 seconds loading time
+            });
+        }
+
+        /**
+         * Displays weather information on the UI.
+         * @param {Object} data - The weather data object.
+         */
+        function displayWeather(data) {
+            loadingElement.classList.add('hidden');
+            errorMessageElement.classList.add('hidden');
+            weatherDisplayElement.classList.remove('hidden');
+
+            cityNameElement.textContent = data.name || 'Your Location';
+            temperatureElement.textContent = `${Math.round(data.main.temp)}°C`;
+            descriptionElement.textContent = data.weather[0].description;
+            humidityElement.textContent = `${Math.round(data.main.humidity)}%`;
+            windSpeedElement.textContent = `${(data.wind.speed * 3.6).toFixed(1)} km/h`; // Convert m/s to km/h
+            pressureElement.textContent = `${Math.round(data.main.pressure)} hPa`;
+            visibilityElement.textContent = `${(data.visibility / 1000).toFixed(1)} km`; // Convert meters to km
+
+            // Set weather icon based on description (using simple emojis for now)
+            // In a real app, you'd map API icon codes to actual weather icons (e.g., Font Awesome, custom SVGs)
+            const weatherDescription = data.weather[0].description.toLowerCase();
+            let icon = '☀️'; // Default sunny
+            if (weatherDescription.includes('cloud')) {
+                icon = '☁️';
+            } else if (weatherDescription.includes('rain')) {
+                icon = '🌧️';
+            } else if (weatherDescription.includes('snow')) {
+                icon = '❄️';
+            } else if (weatherDescription.includes('thunder')) {
+                icon = '⛈️';
+            } else if (weatherDescription.includes('clear')) {
+                icon = '☀️';
+            } else if (weatherDescription.includes('mist') || weatherDescription.includes('fog')) {
+                icon = '🌫️';
+            }
+            weatherIconElement.textContent = icon;
+        }
+
+        /**
+         * Handles errors during geolocation or weather data fetching.
+         * @param {string} message - The error message to display.
+         */
+        function handleError(message) {
+            loadingElement.classList.add('hidden');
+            weatherDisplayElement.classList.add('hidden');
+            errorMessageElement.classList.remove('hidden');
+            errorMessageElement.textContent = `Error: ${message}`;
+            console.error(message);
+        }
+
+        /**
+         * Initializes the weather app by getting the user's location
+         * and then fetching/displaying weather data.
+         */
+        function initializeWeatherApp() {
+            loadingElement.classList.remove('hidden');
+            errorMessageElement.classList.add('hidden');
+            weatherDisplayElement.classList.add('hidden');
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        try {
+                            const weatherData = await fetchWeatherData(lat, lon);
+                            displayWeather(weatherData);
+                        } catch (error) {
+                            handleError(`Failed to fetch weather data: ${error.message}`);
+                        }
+                    },
+                    (error) => {
+                        let errorMessage = "Geolocation denied or unavailable.";
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = "User denied the request for Geolocation.";
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = "Location information is unavailable.";
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage = "The request to get user location timed out.";
+                                break;
+                            case error.UNKNOWN_ERROR:
+                                errorMessage = "An unknown error occurred.";
+                                break;
+                        }
+                        handleError(errorMessage);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000, // 10 seconds
+                        maximumAge: 0 // No cached position
+                    }
+                );
+            } else {
+                handleError("Geolocation is not supported by your browser.");
+            }
+        }
+
+        // Initialize the app when the window loads
+        window.onload = initializeWeatherApp;
+    </script>
+</body>
+</html>
+
